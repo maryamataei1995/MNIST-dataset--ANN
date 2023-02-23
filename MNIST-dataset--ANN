@@ -1,0 +1,212 @@
+# In[1]:
+
+
+# Import the required libraries
+from sklearn import datasets
+from sklearn import svm
+import keras
+import tensorflow as tf
+from keras.datasets import mnist
+from matplotlib import pyplot
+import numpy as np
+import pandas as pd
+import operator 
+from operator import itemgetter
+from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import accuracy_score
+
+
+# In[2]:
+
+
+# reading the data
+train = pd.read_csv('mnist_train.csv')
+test = pd.read_csv('mnist_test.csv')
+
+print(train.shape)
+print(test.shape)
+
+
+# In[3]:
+
+
+# It has 10 digits ranging from 0-9
+
+train.iloc[:,0].value_counts()
+
+
+# In[4]:
+
+
+# splitting the data into dependent and independent variables
+
+train_x = train.iloc[:,1:785]
+train_y = train.iloc[:,0]
+
+test_x = test.iloc[:,1:785]
+test_y = test.iloc[:,0]
+
+print(train_x.shape)
+print(train_y.shape)
+
+print(test_x.shape)
+print(test_y.shape)
+
+
+# In[5]:
+
+
+# splitting the dataset into training and testing set
+
+from sklearn.model_selection import train_test_split
+
+x_train, x_cv, y_train, y_cv = train_test_split(train_x, train_y, test_size = 0.25, random_state = 35)
+
+print(x_train.shape)
+print(x_cv.shape)
+print(y_train.shape)
+print(y_cv.shape)
+
+
+# In[6]:
+
+
+# reshaping them as matrix
+
+x_train = np.asmatrix(x_train).reshape(44999, 784)
+x_cv = np.asmatrix(x_cv).reshape(15000, 784)
+
+test_x = np.asmatrix(test_x).reshape(9999, 784)
+
+
+# In[7]:
+
+
+# feature normalization
+
+x_train = x_train.astype('float32')
+x_cv = x_cv.astype('float32')
+
+test_x = test_x.astype('float32')
+
+x_train = x_train/255
+x_cv = x_cv/255
+test_x = test_x/255
+
+
+# In[8]:
+
+
+# converting the labels into one hot encoding
+
+# immporting keras 
+import keras
+from keras.utils import np_utils
+
+digits = 10
+y_train = keras.utils.np_utils.to_categorical(y_train, digits)
+y_cv = keras.utils.np_utils.to_categorical(y_cv, digits)
+
+
+# In[9]:
+
+
+# viewing the labels after one hot encoding
+
+print(y_train[0])  #7
+print(y_train[3])  #2
+print(y_train[4])  #4
+
+
+# In[10]:
+
+
+#Modelling with Artificial Neural Networks
+
+# ARTIFICIAL NEURAL NETWORKS
+
+import keras 
+from keras.layers import Dense 
+from keras.models import Sequential
+from keras import optimizers
+
+
+# In[11]:
+
+
+# creating the model
+model = Sequential()
+
+# first hidden layer
+model.add(Dense(units = 400, kernel_initializer = 'uniform', activation = 'relu', input_dim = 784))
+
+# second hidden layer
+model.add(Dense(units = 300, kernel_initializer = 'uniform', activation = 'relu'))
+
+# third hidden layer
+model.add(Dense(units = 300, kernel_initializer = 'uniform', activation = 'relu'))
+
+# fourth hidden layer
+model.add(Dense(units = 300, kernel_initializer = 'uniform', activation = 'relu'))
+
+# fifth hidden layer
+model.add(Dense(units = 100, kernel_initializer = 'uniform', activation = 'relu'))
+
+# output layer
+# output_dim = no. of digits
+# softmax activation function is used for multiple outputs
+model.add(Dense(units = 10, kernel_initializer = 'uniform', activation = 'softmax'))
+
+
+# In[12]:
+
+
+# looking at the model summary
+
+model.summary()
+
+
+# In[13]:
+
+
+print(x_train.shape)
+print(x_cv.shape)
+print(y_train.shape)
+print(y_cv.shape)
+
+
+# In[15]:
+
+
+# setting the learning rate
+import tensorflow as tf
+learning_rate = 0.01
+sgd = tf.keras.optimizers.SGD(lr = learning_rate)
+
+
+model.compile(optimizer = 'sgd', loss = 'categorical_crossentropy', metrics = ['accuracy'])
+
+# feeding the training data to the model
+model.fit(x_train, y_train, batch_size = 100, epochs = 60, verbose = 2, validation_data = (x_cv, y_cv))
+
+
+# In[16]:
+
+
+# looking at the model summary
+
+model.summary()
+
+
+# In[17]:
+
+
+# setting the learning rate
+learning_rate = 0.01
+adam = tf.keras.optimizers.Adam(lr = learning_rate)
+
+
+model.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrics = ['accuracy'])
+
+# feeding the training data to the model
+model.fit(x_train, y_train, batch_size = 100, epochs = 20, verbose = 2, validation_data = (x_cv, y_cv))
